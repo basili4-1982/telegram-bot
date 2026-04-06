@@ -32,6 +32,8 @@ func main() {
 	// Регистрируем обработчики
 	handlers.RegisterHandlers(bot)
 
+	//buttons.RegisterHandlers(bot)
+
 	log.Println("Bot started successfully!")
 
 	// Запускаем бота (блокирует выполнение)
