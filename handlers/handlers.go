@@ -26,8 +26,8 @@ func RegisterHandlers(b *tele.Bot) {
 
 // StartHandler обработчик команды /start
 func StartHandler(c tele.Context) error {
-
-	return c.Send(msg, replyMarkup)
+	//return c.Send(msg, replyMarkup)
+	return nil
 }
 
 // HelpHandler обработчик команды /help
