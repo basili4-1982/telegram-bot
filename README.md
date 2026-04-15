@@ -17,6 +17,8 @@
 
 ### Требования
 
+DemoAlertYa04052025Bot
+
 - Go 1.21 или выше
 - Токен Telegram бота (получить у [@BotFather](https://t.me/BotFather))
 

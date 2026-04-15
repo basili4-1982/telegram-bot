@@ -1,21 +1,47 @@
 package main
 
 import (
+	"context"
 	"log"
 	"time"
 
 	tele "gopkg.in/telebot.v3"
+	"resty.dev/v3"
 
-	"telegram-bot/handlers"
+	"telegram-bot/buttons"
+	config2 "telegram-bot/internal/config"
+	"telegram-bot/internal/db"
+	"telegram-bot/internal/rate"
+	"telegram-bot/internal/storage"
 )
 
 func main() {
+	ctx := context.Background()
+
 	// Загружаем конфигурацию
-	config := LoadConfig()
+	config := config2.LoadConfig()
 
 	if config.BotToken == "" {
 		log.Fatal("BOT_TOKEN is not set")
 	}
+
+	connectDb, err := db.OpenDb(ctx, &config.Db)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = db.Up(connectDb)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Migrations applied")
+
+	defer connectDb.Close()
+
+	storage := storage.NewStorage(connectDb)
+
+	apiRate := rate.NewRate(resty.New())
 
 	// Настройки бота
 	settings := tele.Settings{
@@ -30,9 +56,9 @@ func main() {
 	}
 
 	// Регистрируем обработчики
-	handlers.RegisterHandlers(bot)
+	//handlers.RegisterHandlers(bot)
 
-	//buttons.RegisterHandlers(bot)
+	buttons.RegisterHandlers(bot, storage, apiRate)
 
 	log.Println("Bot started successfully!")
 

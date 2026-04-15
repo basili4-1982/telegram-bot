@@ -26,16 +26,8 @@ func RegisterHandlers(b *tele.Bot) {
 
 // StartHandler обработчик команды /start
 func StartHandler(c tele.Context) error {
-	log.Printf("User %s started bot", c.Sender().Username)
-
-	msg := "Привет! 👋\n\nЯ бот-каркас на Go.\nДоступные команды:\n/help - справка\n/info - информация"
-
-	// Создаем клавиатуру
-	btn := tele.Btn{Text: "Узнать больше", Unique: "more_info"}
-	replyMarkup := &tele.ReplyMarkup{}
-	replyMarkup.Inline(replyMarkup.Row(btn))
-
-	return c.Send(msg, replyMarkup)
+	//return c.Send(msg, replyMarkup)
+	return nil
 }
 
 // HelpHandler обработчик команды /help
