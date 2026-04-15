@@ -51,7 +51,7 @@ jobs:
           host: ${{ secrets.STAGING_DEPLOY_HOST }}
           username: ${{ secrets.STAGING_DEPLOY_USER }}
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
-            port: ${{ secrets.STAGING_SSH_PORT }}
+          port: ${{ secrets.STAGING_SSH_PORT }}
           envs: FULL_IMAGE,PROJECT_PATH,COMPOSE_FILE,SERVICE_NAME
           script: |
             echo "=========================================="
