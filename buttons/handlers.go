@@ -6,18 +6,15 @@ import (
 	"log"
 
 	tele "gopkg.in/telebot.v3"
-
-	"telegram-bot/internal/rate"
-	"telegram-bot/internal/storage"
 )
 
 type handlers struct {
-	storage *storage.Storage
-	apiRate *rate.Rate
+	storage Storage
+	apiRate Rate
 }
 
 // RegisterHandlers регистрирует все обработчики
-func RegisterHandlers(b *tele.Bot, storage *storage.Storage, apiRate *rate.Rate) {
+func RegisterHandlers(b *tele.Bot, storage Storage, apiRate Rate) {
 	// Обработчик команды /start (также срабатывает при первом контакте)
 
 	h := handlers{
