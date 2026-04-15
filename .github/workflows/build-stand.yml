@@ -52,7 +52,11 @@ jobs:
               else
             BRANCH="${{ github.ref_name }}"  # ветка push
           fi
-
+          
+          echo $BRANCH | awk '{gsub("/", "_"); print}' >> $BRANCH
+          
+          echo $BRANCH
+        
           # Короткий хеш коммита
           SHORT_SHA="${GITHUB_SHA::7}"
 
