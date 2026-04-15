@@ -1,0 +1,91 @@
+name: Deploy to Staging
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Full image tag (e.g., master-abc1234)'
+        required: true
+        type: string
+        default: 'latest'
+
+jobs:
+  deploy-to-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify image exists
+        id: verify
+        run: |
+          FULL_IMAGE="ghcr.io/basili4-1982:${{ github.event.inputs.image_tag }}"
+          SERVICE_NAME=${{ vars.SERVICE_NAME }}
+          
+          echo "=========================================="
+          echo "Selected image: ${FULL_IMAGE}"
+          echo "=========================================="
+          
+          if docker manifest inspect ${FULL_IMAGE} > /dev/null 2>&1; then
+            echo "✅ Image exists"
+            echo "full_image=${FULL_IMAGE}" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Error: Image ${FULL_IMAGE} does not exist!"
+            exit 1
+          fi
+
+      - name: Deploy to Staging Server
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.STAGING_DEPLOY_HOST }}
+          username: ${{ secrets.STAGING_DEPLOY_USER }}
+          key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+            port: ${{ secrets.STAGING_SSH_PORT }}
+          envs: FULL_IMAGE,PROJECT_PATH,COMPOSE_FILE,SERVICE_NAME
+          script: |
+            echo "=========================================="
+            echo "🚀 Deploying to STAGING"
+            echo "📦 Image: ${FULL_IMAGE}"
+            echo "📁 Project path: ${PROJECT_PATH}"
+            echo "📄 Compose file: ${COMPOSE_FILE}"
+            echo "🔧 Service: sender-email"
+            echo "🕐 Time: $(date)"
+            echo "=========================================="
+            
+            # Переходим в директорию проекта
+            if [ ! -d "${PROJECT_PATH}" ]; then
+              echo "❌ Error: Project directory ${PROJECT_PATH} does not exist!"
+              exit 1
+            fi
+            
+            cd ${PROJECT_PATH}
+            
+            # Проверяем существование docker-compose файла
+            if [ ! -f "${COMPOSE_FILE}" ]; then
+              echo "❌ Error: Docker compose file ${COMPOSE_FILE} not found in ${PROJECT_PATH}!"
+              exit 1
+            fi
+            
+            # Бэкап
+            BACKUP_FILE="${COMPOSE_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+            cp ${COMPOSE_FILE} ${BACKUP_FILE}
+            echo "✅ Backup created: ${BACKUP_FILE}"
+            
+            # Обновляем образ ТОЛЬКО для сервиса app
+            sed -i "/^  ${SERVICE_NAME}:/,/^  [^ ]/ s|image: .*|image: ${FULL_IMAGE}|" ${COMPOSE_FILE}
+
+        env:
+          FULL_IMAGE: ${{ steps.verify.outputs.full_image }}
+          PROJECT_PATH: ${{ vars.PROJECT_PATH }}
+          COMPOSE_FILE: ${{ vars.COMPOSE_FILE }}
