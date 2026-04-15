@@ -30,7 +30,7 @@ jobs:
       - name: Verify image exists
         id: verify
         run: |
-          FULL_IMAGE="ghcr.io/basili4-1982:${{ github.event.inputs.image_tag }}"
+          FULL_IMAGE="ghcr.io/basili4-1982/telegram-bot:${{ github.event.inputs.image_tag }}"
           SERVICE_NAME=${{ vars.SERVICE_NAME }}
           
           echo "=========================================="
