@@ -53,7 +53,7 @@ jobs:
             BRANCH="${{ github.ref_name }}"  # ветка push
           fi
           
-          $BRANCH=$(echo $BRANCH | awk '{gsub("/", "_"); print}')   
+          $BRANCH=$(echo $BRANCH | awk '{gsub("/", "_");gsub("-", "_"); print}')   
           
           echo $BRANCH
         
